@@ -14,5 +14,5 @@ public interface ICloudflareDownloader
     /// <param name="cancellationToken"></param>
     /// <returns>The raw content of the file as a string</returns>
     [Pure]
-    ValueTask<string?> DownloadTextFile(string url, int timeoutMs = 60000, CancellationToken cancellationToken = default);
+    ValueTask<string?> GetPageContent(string url, int timeoutMs = 60000, CancellationToken cancellationToken = default);
 }

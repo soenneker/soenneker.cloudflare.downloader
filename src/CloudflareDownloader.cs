@@ -18,9 +18,9 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
         _logger = logger;
     }
 
-    public async ValueTask<string?> DownloadTextFile(string url, int timeoutMs = 60000, CancellationToken cancellationToken = default)
+    public async ValueTask<string?> GetPageContent(string url, int timeoutMs = 60000, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Starting download from: {Url}", url);
+        _logger.LogInformation("Starting GetPageContent from: {Url} ...", url);
 
         try
         {
@@ -32,7 +32,7 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
             IBrowserContext context = await browser.NewContextAsync();
             IPage page = await context.NewPageAsync().NoSync();
 
-            _logger.LogInformation("Navigating to URL...");
+            _logger.LogInformation("Navigating to URL ({Url})...", url);
             IResponse? response = await page.GotoAsync(url, new PageGotoOptions
             {
                 WaitUntil = WaitUntilState.NetworkIdle,
@@ -53,7 +53,7 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
                 return null;
             }
 
-            _logger.LogInformation("Successfully fetched file, reading content...");
+            _logger.LogInformation("Successfully fetched content, reading...");
 
             string content = await response.TextAsync().NoSync();
 
