@@ -30,7 +30,7 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
 
         try
         {
-            using IPlaywright? playwright = await Microsoft.Playwright.Playwright.CreateAsync().NoSync();
+            using IPlaywright playwright = await Microsoft.Playwright.Playwright.CreateAsync().NoSync();
 
             _logger.LogDebug("Launching headless Chromium browser...");
             await using IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true }).NoSync();
