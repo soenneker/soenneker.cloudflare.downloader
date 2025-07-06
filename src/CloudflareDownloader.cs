@@ -33,7 +33,8 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
             using IPlaywright playwright = await Microsoft.Playwright.Playwright.CreateAsync().NoSync();
 
             _logger.LogDebug("Launching headless Chromium browser...");
-            await using IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true }).NoSync();
+            // New headless mode https://playwright.dev/docs/browsers
+            await using IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Channel = "chromium"}).NoSync();
 
             IBrowserContext context = await browser.NewContextAsync().NoSync();
             IPage page = await context.NewPageAsync().NoSync();
