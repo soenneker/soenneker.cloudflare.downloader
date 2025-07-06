@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 using Soenneker.Cloudflare.Downloader.Abstract;
 using Soenneker.Extensions.Task;
+using Soenneker.Extensions.ValueTask;
+using Soenneker.Playwright.Installation.Abstract;
 
 namespace Soenneker.Cloudflare.Downloader;
 
@@ -12,24 +14,28 @@ namespace Soenneker.Cloudflare.Downloader;
 public sealed class CloudflareDownloader : ICloudflareDownloader
 {
     private readonly ILogger<CloudflareDownloader> _logger;
+    private readonly IPlaywrightInstallationUtil _playwrightInstallationUtil;
 
-    public CloudflareDownloader(ILogger<CloudflareDownloader> logger)
+    public CloudflareDownloader(ILogger<CloudflareDownloader> logger, IPlaywrightInstallationUtil playwrightInstallationUtil)
     {
         _logger = logger;
+        _playwrightInstallationUtil = playwrightInstallationUtil;
     }
 
     public async ValueTask<string?> GetPageContent(string url, int timeoutMs = 60000, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Starting GetPageContent from: {Url} ...", url);
 
+        await _playwrightInstallationUtil.EnsureInstalled(cancellationToken).NoSync();
+
         try
         {
-            using IPlaywright? playwright = await Playwright.CreateAsync().NoSync();
+            using IPlaywright? playwright = await Microsoft.Playwright.Playwright.CreateAsync().NoSync();
 
             _logger.LogDebug("Launching headless Chromium browser...");
-            await using IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
+            await using IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true }).NoSync();
 
-            IBrowserContext context = await browser.NewContextAsync();
+            IBrowserContext context = await browser.NewContextAsync().NoSync();
             IPage page = await context.NewPageAsync().NoSync();
 
             _logger.LogInformation("Navigating to URL ({Url})...", url);
