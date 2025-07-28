@@ -1,12 +1,13 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 using Soenneker.Cloudflare.Downloader.Abstract;
 using Soenneker.Extensions.Task;
 using Soenneker.Extensions.ValueTask;
 using Soenneker.Playwright.Installation.Abstract;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Soenneker.Playwrights.Extensions.Stealth;
 
 namespace Soenneker.Cloudflare.Downloader;
 
@@ -33,10 +34,10 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
             using IPlaywright playwright = await Microsoft.Playwright.Playwright.CreateAsync().NoSync();
 
             _logger.LogDebug("Launching headless Chromium browser...");
-            // New headless mode https://playwright.dev/docs/browsers
-            await using IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Channel = "chromium"}).NoSync();
+            await using IBrowser browser = await playwright.LaunchStealthChromium().NoSync();
 
-            IBrowserContext context = await browser.NewContextAsync().NoSync();
+            IBrowserContext context = await browser.CreateStealthContext();
+
             IPage page = await context.NewPageAsync().NoSync();
 
             _logger.LogInformation("Navigating to URL ({Url})...", url);
