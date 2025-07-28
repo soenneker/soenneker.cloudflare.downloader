@@ -36,7 +36,7 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
             _logger.LogDebug("Launching headless Chromium browser...");
             await using IBrowser browser = await playwright.LaunchStealthChromium().NoSync();
 
-            IBrowserContext context = await browser.CreateStealthContext();
+            IBrowserContext context = await browser.CreateStealthContext().NoSync();
 
             IPage page = await context.NewPageAsync().NoSync();
 
