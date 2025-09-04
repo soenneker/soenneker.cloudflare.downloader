@@ -44,6 +44,6 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8" />
         <PackageReference Include="Soenneker.Extensions.Task" Version="3.0.105" />
         <PackageReference Include="Soenneker.Playwright.Installation" Version="3.0.34" />
-        <PackageReference Include="Soenneker.Playwrights.Extensions.Stealth" Version="3.0.10" />
+        <PackageReference Include="Soenneker.Playwrights.Extensions.Stealth" Version="3.0.12" />
     </ItemGroup>
 </Project>
