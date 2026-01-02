@@ -14,7 +14,7 @@
         <AssemblyName>Soenneker.Cloudflare.Downloader</AssemblyName>
         <PackageId>Soenneker.Cloudflare.Downloader</PackageId>
         <PackageTags>cloudflare downloader download under attack mode javascript headless managed cloudflaredownloader util csharp dotnet c# .net</PackageTags>
-        <Copyright>Copyright © 2025 Jake Soenneker</Copyright>
+        <Copyright>Copyright © 2025-2026 Jake Soenneker</Copyright>
         <Authors>Jake Soenneker</Authors>
         <Company>https://soenneker.com</Company>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
