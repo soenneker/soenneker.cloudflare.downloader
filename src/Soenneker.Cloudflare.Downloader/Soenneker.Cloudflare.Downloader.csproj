@@ -44,7 +44,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Soenneker.Playwright.Installation" Version="4.0.219" />
+        <PackageReference Include="Soenneker.Playwright.Installation" Version="4.0.230" />
         <PackageReference Include="Soenneker.Playwrights.Extensions.Stealth" Version="4.0.58" />
     </ItemGroup>
 </Project>
