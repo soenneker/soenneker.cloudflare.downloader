@@ -5,14 +5,17 @@ using Soenneker.Extensions.Task;
 using Soenneker.Extensions.ValueTask;
 using Soenneker.Playwright.Installation.Abstract;
 using Soenneker.Playwrights.Extensions.Stealth;
+using Soenneker.Utils.File.Abstract;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Soenneker.Cloudflare.Downloader.Results;
 using Soenneker.Cloudflare.Downloader.Requests;
 using Soenneker.Extensions.String;
+using Soenneker.Utils.Directory.Abstract;
 
 namespace Soenneker.Cloudflare.Downloader;
 
@@ -27,11 +30,15 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
 
     private readonly ILogger<CloudflareDownloader> _logger;
     private readonly IPlaywrightInstallationUtil _playwrightInstallationUtil;
+    private readonly IFileUtil _fileUtil;
+    private readonly IDirectoryUtil _directoryUtil;
 
-    public CloudflareDownloader(ILogger<CloudflareDownloader> logger, IPlaywrightInstallationUtil playwrightInstallationUtil)
+    public CloudflareDownloader(ILogger<CloudflareDownloader> logger, IPlaywrightInstallationUtil playwrightInstallationUtil, IFileUtil fileUtil, IDirectoryUtil directoryUtil)
     {
         _logger = logger;
         _playwrightInstallationUtil = playwrightInstallationUtil;
+        _fileUtil = fileUtil;
+        _directoryUtil = directoryUtil;
     }
 
     public async ValueTask<CloudflareDownloadResult> DownloadPage(CloudflareDownloadRequest request, CancellationToken cancellationToken = default)
@@ -252,7 +259,7 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
                 _logger.LogInformation("Completed file download for {Url}. Success: {Success}, Status: {StatusCode}, Size: {Size}", request.Url, response.Ok,
                     response.Status, body.Length);
 
-                return new CloudflareFileDownloadResult
+                var result = new CloudflareFileDownloadResult
                 {
                     RequestedUrl = request.Url,
                     FinalUrl = response.Url,
@@ -264,6 +271,20 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
                     Data = body,
                     ErrorMessage = response.Ok ? null : response.StatusText
                 };
+
+                if (response.Ok && body.Length > 0 && !string.IsNullOrWhiteSpace(request.FilePath))
+                {
+                    string? dir = Path.GetDirectoryName(request.FilePath);
+
+                    if (!string.IsNullOrEmpty(dir))
+                        await _directoryUtil.Create(dir, true, cancellationToken)
+                                      .NoSync();
+
+                    await _fileUtil.Write(request.FilePath, body, log: true, cancellationToken)
+                                  .NoSync();
+                }
+
+                return result;
             }
             finally
             {
@@ -306,9 +327,14 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
         return System.Text.Encoding.UTF8.GetString(result.Data);
     }
 
-    public async ValueTask<string?> GetPageContent(string url, int timeoutMs = _defaultTimeoutMs, CancellationToken cancellationToken = default)
+    public async ValueTask<CloudflareFileDownloadResult> DownloadFileToPath(string url, string filePath, int timeoutMs = _defaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-        return await DownloadHtml(url, timeoutMs, cancellationToken)
+        return await DownloadFile(new CloudflareFileDownloadRequest
+            {
+                Url = url,
+                TimeoutMs = timeoutMs,
+                FilePath = filePath
+            }, cancellationToken)
             .NoSync();
     }
 

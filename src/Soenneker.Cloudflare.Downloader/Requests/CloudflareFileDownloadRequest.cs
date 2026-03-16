@@ -15,4 +15,10 @@ public sealed class CloudflareFileDownloadRequest
     /// Maximum time in milliseconds to wait for the response. Default is 60,000 (60 seconds).
     /// </summary>
     public int TimeoutMs { get; set; } = 60_000;
+
+    /// <summary>
+    /// Optional full path on disk to write the downloaded file. When set, the response body is written via <see cref="Soenneker.Utils.File.Abstract.IFileUtil"/>.
+    /// Parent directory is created if it does not exist.
+    /// </summary>
+    public string? FilePath { get; set; }
 }

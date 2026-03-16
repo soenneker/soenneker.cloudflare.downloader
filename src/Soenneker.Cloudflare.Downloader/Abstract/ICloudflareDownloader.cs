@@ -32,12 +32,25 @@ public interface ICloudflareDownloader
 
     /// <summary>
     /// Downloads a file (binary or text) from the given URL using the browser, e.g. for Cloudflare-protected file URLs.
+    /// When <see cref="CloudflareFileDownloadRequest.FilePath"/> is set, the response body is also written to that path via <see cref="Soenneker.Utils.File.Abstract.IFileUtil"/>.
     /// </summary>
-    /// <param name="request">Request options (URL, timeout, headers, etc.)</param>
+    /// <param name="request">Request options (URL, timeout, optional file path, etc.)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Result with raw response body bytes, content type, and optional suggested filename</returns>
     [Pure]
     ValueTask<CloudflareFileDownloadResult> DownloadFile(CloudflareFileDownloadRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Downloads a file from the given URL and writes it to the specified file path using <see cref="Soenneker.Utils.File.Abstract.IFileUtil"/>.
+    /// Parent directory is created if it does not exist.
+    /// </summary>
+    /// <param name="url">The URL of the file to download</param>
+    /// <param name="filePath">Full path on disk where the file will be written</param>
+    /// <param name="timeoutMs">Timeout in milliseconds</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Result with success, status, and metadata; <see cref="CloudflareFileDownloadResult.Data"/> is still populated</returns>
+    [Pure]
+    ValueTask<CloudflareFileDownloadResult> DownloadFileToPath(string url, string filePath, int timeoutMs = 60_000, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Downloads a file from the given URL and returns the response body as a string (e.g. for JSON, XML, or text files behind Cloudflare).
@@ -48,14 +61,4 @@ public interface ICloudflareDownloader
     /// <returns>The response body as a string if successful, otherwise null</returns>
     [Pure]
     ValueTask<string?> DownloadFile(string url, int timeoutMs = 60_000, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Fetches text-based content from a URL using Playwright (legacy convenience). Prefer <see cref="DownloadHtml"/> or <see cref="DownloadPage"/> for new code.
-    /// </summary>
-    /// <param name="url">The direct URL to the resource</param>
-    /// <param name="timeoutMs">Timeout in milliseconds</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The raw content as a string, or null on failure</returns>
-    [Pure]
-    ValueTask<string?> GetPageContent(string url, int timeoutMs = 60_000, CancellationToken cancellationToken = default);
 }

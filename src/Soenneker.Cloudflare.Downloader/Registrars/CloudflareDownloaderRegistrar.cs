@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Soenneker.Cloudflare.Downloader.Abstract;
 using Soenneker.Playwright.Installation.Registrars;
+using Soenneker.Utils.Directory.Registrars;
+using Soenneker.Utils.File.Registrars;
 
 namespace Soenneker.Cloudflare.Downloader.Registrars;
 
@@ -15,7 +17,10 @@ public static class CloudflareDownloaderRegistrar
     /// </summary>
     public static IServiceCollection AddCloudflareDownloaderAsSingleton(this IServiceCollection services)
     {
-        services.AddPlaywrightInstallationUtilAsSingleton().TryAddSingleton<ICloudflareDownloader, CloudflareDownloader>();
+        services.AddFileUtilAsSingleton()
+                .AddDirectoryUtilAsSingleton()
+                .AddPlaywrightInstallationUtilAsSingleton()
+                .TryAddSingleton<ICloudflareDownloader, CloudflareDownloader>();
 
         return services;
     }
@@ -25,7 +30,10 @@ public static class CloudflareDownloaderRegistrar
     /// </summary>
     public static IServiceCollection AddCloudflareDownloaderAsScoped(this IServiceCollection services)
     {
-        services.AddPlaywrightInstallationUtilAsSingleton().TryAddScoped<ICloudflareDownloader, CloudflareDownloader>();
+        services.AddFileUtilAsScoped()
+                .AddDirectoryUtilAsScoped()
+                .AddPlaywrightInstallationUtilAsSingleton()
+                .TryAddScoped<ICloudflareDownloader, CloudflareDownloader>();
 
         return services;
     }
