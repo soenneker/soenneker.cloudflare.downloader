@@ -24,7 +24,7 @@ namespace Soenneker.Cloudflare.Downloader;
 public sealed class CloudflareDownloader : ICloudflareDownloader
 {
     private const int _defaultTimeoutMs = 60_000;
-    private const int _defaultPostNavigationDelayMs = 1_500;
+    private const int _defaultPostNavigationDelayMs = 250;
 
     private static readonly Regex _contentDispositionFilenameRegex = new(@"filename\*?=(?:UTF-8'')?[""]?([^"";\r\n]+)[""]?|filename=[""]?([^"";\r\n]+)[""]?",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -89,10 +89,12 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
                                                 .NoSync();
 
                 if (request.PostNavigationDelayMs > 0)
+                {
                     await page.WaitForTimeoutAsync(request.PostNavigationDelayMs)
                               .NoSync();
+                }
 
-                if (!string.IsNullOrWhiteSpace(request.WaitForSelector))
+                if (request.WaitForSelector.HasContent())
                 {
                     _logger.LogDebug("Waiting for selector {Selector}", request.WaitForSelector);
 
@@ -254,7 +256,7 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
                     };
                 }
 
-                byte[] body = await response.BodyAsync();
+                byte[] body = await response.BodyAsync().NoSync();
                 string? contentType = GetContentType(response);
                 string? suggestedFileName = GetSuggestedFileName(response);
 
