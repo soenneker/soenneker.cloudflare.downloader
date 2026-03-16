@@ -16,9 +16,7 @@ using Soenneker.Extensions.String;
 
 namespace Soenneker.Cloudflare.Downloader;
 
-/// <summary>
-/// Browser-backed downloader for retrieving rendered page content and files, including from Cloudflare-protected or JS-heavy sites.
-/// </summary>
+///<inheritdoc cref="ICloudflareDownloader"/>
 public sealed class CloudflareDownloader : ICloudflareDownloader
 {
     private const int _defaultTimeoutMs = 60_000;
