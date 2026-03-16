@@ -61,4 +61,29 @@ public interface ICloudflareDownloader
     /// <returns>The response body as a string if successful, otherwise null</returns>
     [Pure]
     ValueTask<string?> DownloadFile(string url, int timeoutMs = 60_000, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Downloads JSON from the given URL and returns the response body as a string.
+    /// When <paramref name="formatted"/> is true, the JSON is pretty-printed via <see cref="Soenneker.Utils.Json.JsonUtil.Format"/>.
+    /// </summary>
+    /// <param name="url">The URL of the JSON resource to download</param>
+    /// <param name="formatted">When true, pretty-format the JSON; otherwise return as-is</param>
+    /// <param name="timeoutMs">Timeout in milliseconds</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The JSON string if successful (optionally formatted), otherwise null</returns>
+    [Pure]
+    ValueTask<string?> DownloadJson(string url, bool formatted = false, int timeoutMs = 60_000, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Downloads JSON from the given URL and writes it to the specified file path using <see cref="Soenneker.Utils.File.Abstract.IFileUtil"/>.
+    /// Parent directory is created if it does not exist. When <paramref name="formatted"/> is true, the JSON is pretty-printed via <see cref="Soenneker.Utils.Json.JsonUtil.Format"/>.
+    /// </summary>
+    /// <param name="url">The URL of the JSON resource to download</param>
+    /// <param name="filePath">Full path on disk where the file will be written</param>
+    /// <param name="formatted">When true, pretty-format the JSON before writing; otherwise write as-is</param>
+    /// <param name="timeoutMs">Timeout in milliseconds</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if the file was successfully downloaded and written; otherwise false</returns>
+    [Pure]
+    ValueTask<bool> DownloadJsonToPath(string url, string filePath, bool formatted = false, int timeoutMs = 60_000, CancellationToken cancellationToken = default);
 }

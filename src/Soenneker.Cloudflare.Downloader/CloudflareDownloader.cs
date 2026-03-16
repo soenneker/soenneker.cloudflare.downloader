@@ -16,6 +16,7 @@ using Soenneker.Cloudflare.Downloader.Results;
 using Soenneker.Cloudflare.Downloader.Requests;
 using Soenneker.Extensions.String;
 using Soenneker.Utils.Directory.Abstract;
+using Soenneker.Utils.Json;
 
 namespace Soenneker.Cloudflare.Downloader;
 
@@ -33,7 +34,8 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
     private readonly IFileUtil _fileUtil;
     private readonly IDirectoryUtil _directoryUtil;
 
-    public CloudflareDownloader(ILogger<CloudflareDownloader> logger, IPlaywrightInstallationUtil playwrightInstallationUtil, IFileUtil fileUtil, IDirectoryUtil directoryUtil)
+    public CloudflareDownloader(ILogger<CloudflareDownloader> logger, IPlaywrightInstallationUtil playwrightInstallationUtil, IFileUtil fileUtil,
+        IDirectoryUtil directoryUtil)
     {
         _logger = logger;
         _playwrightInstallationUtil = playwrightInstallationUtil;
@@ -276,12 +278,12 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
                 {
                     string? dir = Path.GetDirectoryName(request.FilePath);
 
-                    if (!string.IsNullOrEmpty(dir))
+                    if (dir.HasContent())
                         await _directoryUtil.Create(dir, true, cancellationToken)
-                                      .NoSync();
+                                            .NoSync();
 
                     await _fileUtil.Write(request.FilePath, body, log: true, cancellationToken)
-                                  .NoSync();
+                                   .NoSync();
                 }
 
                 return result;
@@ -327,7 +329,8 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
         return System.Text.Encoding.UTF8.GetString(result.Data);
     }
 
-    public async ValueTask<CloudflareFileDownloadResult> DownloadFileToPath(string url, string filePath, int timeoutMs = _defaultTimeoutMs, CancellationToken cancellationToken = default)
+    public async ValueTask<CloudflareFileDownloadResult> DownloadFileToPath(string url, string filePath, int timeoutMs = _defaultTimeoutMs,
+        CancellationToken cancellationToken = default)
     {
         return await DownloadFile(new CloudflareFileDownloadRequest
             {
@@ -336,6 +339,51 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
                 FilePath = filePath
             }, cancellationToken)
             .NoSync();
+    }
+
+    public async ValueTask<string?> DownloadJson(string url, bool formatted = false, int timeoutMs = _defaultTimeoutMs,
+        CancellationToken cancellationToken = default)
+    {
+        string? json = await DownloadFile(url, timeoutMs, cancellationToken)
+            .NoSync();
+
+        if (json == null)
+            return null;
+
+        if (!formatted)
+            return json;
+
+        try
+        {
+            return JsonUtil.Format(json, forceWindowsLineEndings: false);
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return json;
+        }
+    }
+
+    public async ValueTask<bool> DownloadJsonToPath(string url, string filePath, bool formatted = false, int timeoutMs = _defaultTimeoutMs,
+        CancellationToken cancellationToken = default)
+    {
+        string? json = await DownloadJson(url, formatted, timeoutMs, cancellationToken)
+            .NoSync();
+
+        if (json == null)
+            return false;
+
+        string? dir = Path.GetDirectoryName(filePath);
+
+        if (dir.HasContent())
+        {
+            await _directoryUtil.Create(dir, true, cancellationToken)
+                                .NoSync();
+        }
+
+        await _fileUtil.Write(filePath, json, log: true, cancellationToken)
+                       .NoSync();
+
+        return true;
     }
 
     private static string? GetContentType(IResponse? response)
