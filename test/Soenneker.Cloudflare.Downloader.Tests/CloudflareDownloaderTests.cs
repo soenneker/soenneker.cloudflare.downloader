@@ -26,9 +26,9 @@ public sealed class CloudflareDownloaderTests : FixturedUnitTest
     [LocalFact]
     public async ValueTask GetPageContent_ValidUrl_ReturnsContent()
     {
-        const string url = "https://api.instantly.ai/openapi/api_v2.json";
+        const string url = "https://api.weather.gov/openapi.json";
         
-        string? content = await _util.GetPageContent(url);
+        string? content = await _util.DownloadFile(url, cancellationToken: CancellationToken);
         content.Should().NotBeNull();
     }
 }
