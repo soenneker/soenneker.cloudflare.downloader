@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Soenneker.Cloudflare.Downloader.Abstract;
-using Soenneker.Playwright.Installation.Registrars;
+using Soenneker.Playwrights.Installation.Registrars;
 using Soenneker.Utils.Directory.Registrars;
 using Soenneker.Utils.File.Registrars;
 

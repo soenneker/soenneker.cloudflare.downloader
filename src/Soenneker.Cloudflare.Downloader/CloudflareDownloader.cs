@@ -1,22 +1,23 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 using Soenneker.Cloudflare.Downloader.Abstract;
+using Soenneker.Cloudflare.Downloader.Requests;
+using Soenneker.Cloudflare.Downloader.Results;
+using Soenneker.Cloudflare.Downloader.Utils;
+using Soenneker.Extensions.String;
 using Soenneker.Extensions.Task;
 using Soenneker.Extensions.ValueTask;
-using Soenneker.Playwright.Installation.Abstract;
 using Soenneker.Playwrights.Extensions.Stealth;
+using Soenneker.Playwrights.Installation.Abstract;
+using Soenneker.Utils.Directory.Abstract;
 using Soenneker.Utils.File.Abstract;
+using Soenneker.Utils.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Soenneker.Cloudflare.Downloader.Results;
-using Soenneker.Cloudflare.Downloader.Requests;
-using Soenneker.Extensions.String;
-using Soenneker.Utils.Directory.Abstract;
-using Soenneker.Utils.Json;
 
 namespace Soenneker.Cloudflare.Downloader;
 
@@ -25,9 +26,6 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
 {
     private const int _defaultTimeoutMs = 60_000;
     private const int _defaultPostNavigationDelayMs = 250;
-
-    private static readonly Regex _contentDispositionFilenameRegex = new(@"filename\*?=(?:UTF-8'')?[""]?([^"";\r\n]+)[""]?|filename=[""]?([^"";\r\n]+)[""]?",
-        RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private readonly ILogger<CloudflareDownloader> _logger;
     private readonly IPlaywrightInstallationUtil _playwrightInstallationUtil;
@@ -62,8 +60,8 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
 
         try
         {
-            using IPlaywright playwright = await Microsoft.Playwright.Playwright.CreateAsync()
-                                                          .NoSync();
+            using IPlaywright playwright = await Playwright.CreateAsync()
+                                                           .NoSync();
 
             await using IBrowser browser = await playwright.LaunchStealthChromium()
                                                            .NoSync();
@@ -221,8 +219,8 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
 
         try
         {
-            using IPlaywright playwright = await Microsoft.Playwright.Playwright.CreateAsync()
-                                                          .NoSync();
+            using IPlaywright playwright = await Playwright.CreateAsync()
+                                                           .NoSync();
 
             await using IBrowser browser = await playwright.LaunchStealthChromium()
                                                            .NoSync();
@@ -256,7 +254,8 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
                     };
                 }
 
-                byte[] body = await response.BodyAsync().NoSync();
+                byte[] body = await response.BodyAsync()
+                                            .NoSync();
                 string? contentType = GetContentType(response);
                 string? suggestedFileName = GetSuggestedFileName(response);
 
@@ -331,16 +330,15 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
         return System.Text.Encoding.UTF8.GetString(result.Data);
     }
 
-    public async ValueTask<CloudflareFileDownloadResult> DownloadFileToPath(string url, string filePath, int timeoutMs = _defaultTimeoutMs,
+    public ValueTask<CloudflareFileDownloadResult> DownloadFileToPath(string url, string filePath, int timeoutMs = _defaultTimeoutMs,
         CancellationToken cancellationToken = default)
     {
-        return await DownloadFile(new CloudflareFileDownloadRequest
-            {
-                Url = url,
-                TimeoutMs = timeoutMs,
-                FilePath = filePath
-            }, cancellationToken)
-            .NoSync();
+        return DownloadFile(new CloudflareFileDownloadRequest
+        {
+            Url = url,
+            TimeoutMs = timeoutMs,
+            FilePath = filePath
+        }, cancellationToken);
     }
 
     public async ValueTask<string?> DownloadJson(string url, bool formatted = false, int timeoutMs = _defaultTimeoutMs,
@@ -408,10 +406,11 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
             return null;
         try
         {
-            if (!response.Headers.TryGetValue("content-disposition", out string? disposition) || string.IsNullOrWhiteSpace(disposition))
+            if (!response.Headers.TryGetValue("content-disposition", out string? disposition) || disposition.IsNullOrWhiteSpace())
                 return null;
 
-            Match m = _contentDispositionFilenameRegex.Match(disposition);
+            Match m = ContentDispositionRegex.Filename()
+                                             .Match(disposition);
             if (!m.Success)
                 return null;
 
@@ -420,7 +419,7 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
                    .Value.Trim()
                 : m.Groups[2]
                    .Value.Trim();
-            return string.IsNullOrWhiteSpace(name) ? null : name;
+            return name.IsNullOrWhiteSpace() ? null : name;
         }
         catch
         {
