@@ -1,29 +1,28 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using AwesomeAssertions;
 using Soenneker.Cloudflare.Downloader.Abstract;
-using Soenneker.Facts.Local;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.Attributes.Local;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Cloudflare.Downloader.Tests;
 
-[Collection("Collection")]
-public sealed class CloudflareDownloaderTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public sealed class CloudflareDownloaderTests : HostedUnitTest
 {
     private readonly ICloudflareDownloader _util;
 
-    public CloudflareDownloaderTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public CloudflareDownloaderTests(Host host) : base(host)
     {
         _util = Resolve<ICloudflareDownloader>(true);
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
     }
 
-    [LocalFact]
+    [LocalOnly]
     public async ValueTask GetPageContent_ValidUrl_ReturnsContent()
     {
         const string url = "https://api.weather.gov/openapi.json";
