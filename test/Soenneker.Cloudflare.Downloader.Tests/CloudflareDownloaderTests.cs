@@ -27,7 +27,8 @@ public sealed class CloudflareDownloaderTests : HostedUnitTest
     {
         const string url = "https://api.weather.gov/openapi.json";
         
-        string? content = await _util.DownloadFile(url, cancellationToken: CancellationToken);
+        string? content = await _util.DownloadFile(url, cancellationToken: System.Threading.CancellationToken.None);
         content.Should().NotBeNull();
     }
 }
+
