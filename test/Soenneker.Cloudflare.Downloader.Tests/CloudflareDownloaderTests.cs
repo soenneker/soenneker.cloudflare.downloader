@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using AwesomeAssertions;
 using Soenneker.Cloudflare.Downloader.Abstract;
@@ -23,11 +24,11 @@ public sealed class CloudflareDownloaderTests : HostedUnitTest
     }
 
     [LocalOnly]
-    public async ValueTask GetPageContent_ValidUrl_ReturnsContent()
+    public async ValueTask GetPageContent_ValidUrl_ReturnsContent(CancellationToken cancellationToken)
     {
         const string url = "https://api.weather.gov/openapi.json";
         
-        string? content = await _util.DownloadFile(url, cancellationToken: System.Threading.CancellationToken.None);
+        string? content = await _util.DownloadFile(url, cancellationToken: cancellationToken);
         content.Should().NotBeNull();
     }
 }

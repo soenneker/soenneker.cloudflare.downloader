@@ -17,9 +17,9 @@ public static class CloudflareDownloaderRegistrar
     /// </summary>
     public static IServiceCollection AddCloudflareDownloaderAsSingleton(this IServiceCollection services)
     {
-        services.AddFileUtilAsSingleton()
+        services.AddPlaywrightInstallationUtilAsSingleton()
+                .AddFileUtilAsSingleton()
                 .AddDirectoryUtilAsSingleton()
-                .AddPlaywrightInstallationUtilAsSingleton()
                 .TryAddSingleton<ICloudflareDownloader, CloudflareDownloader>();
 
         return services;
@@ -30,9 +30,9 @@ public static class CloudflareDownloaderRegistrar
     /// </summary>
     public static IServiceCollection AddCloudflareDownloaderAsScoped(this IServiceCollection services)
     {
-        services.AddFileUtilAsScoped()
+        services.AddPlaywrightInstallationUtilAsSingleton()
+                .AddFileUtilAsScoped()
                 .AddDirectoryUtilAsScoped()
-                .AddPlaywrightInstallationUtilAsSingleton()
                 .TryAddScoped<ICloudflareDownloader, CloudflareDownloader>();
 
         return services;
