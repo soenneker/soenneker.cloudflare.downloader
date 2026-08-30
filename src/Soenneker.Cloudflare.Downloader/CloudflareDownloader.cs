@@ -21,7 +21,6 @@ using System.Threading.Tasks;
 
 namespace Soenneker.Cloudflare.Downloader;
 
-///<inheritdoc cref="ICloudflareDownloader"/>
 public sealed class CloudflareDownloader : ICloudflareDownloader
 {
     private const int _defaultTimeoutMs = 60_000;
@@ -161,6 +160,10 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
                           .NoSync();
             }
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error downloading page from {Url}", request.Url);
@@ -294,6 +297,10 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
                 await page.CloseAsync()
                           .NoSync();
             }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
