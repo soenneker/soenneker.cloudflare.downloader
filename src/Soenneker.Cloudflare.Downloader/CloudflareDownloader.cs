@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 
 namespace Soenneker.Cloudflare.Downloader;
 
+/// <inheritdoc cref="ICloudflareDownloader" />
 public sealed class CloudflareDownloader : ICloudflareDownloader
 {
     private const int _defaultTimeoutMs = 60_000;
