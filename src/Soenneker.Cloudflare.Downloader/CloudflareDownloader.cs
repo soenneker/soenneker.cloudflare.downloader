@@ -363,7 +363,8 @@ public sealed class CloudflareDownloader : ICloudflareDownloader
 
         try
         {
-            return JsonUtil.Format(json, forceWindowsLineEndings: false);
+            using System.Text.Json.JsonDocument document = System.Text.Json.JsonDocument.Parse(json);
+            return JsonUtil.Serialize(document, FormattingJsonContext.Default.JsonDocument);
         }
         catch (System.Text.Json.JsonException)
         {

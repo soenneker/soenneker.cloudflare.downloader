@@ -64,7 +64,7 @@ public interface ICloudflareDownloader
 
     /// <summary>
     /// Downloads JSON from the given URL and returns the response body as a string.
-    /// When <paramref name="formatted"/> is true, the JSON is pretty-printed via <see cref="Soenneker.Utils.Json.JsonUtil.Format"/>.
+    /// When <paramref name="formatted"/> is true, the JSON is pretty-printed using generated JSON metadata.
     /// </summary>
     /// <param name="url">The URL of the JSON resource to download</param>
     /// <param name="formatted">When true, pretty-format the JSON; otherwise return as-is</param>
@@ -76,7 +76,7 @@ public interface ICloudflareDownloader
 
     /// <summary>
     /// Downloads JSON from the given URL and writes it to the specified file path using <see cref="Soenneker.Utils.File.Abstract.IFileUtil"/>.
-    /// Parent directory is created if it does not exist. When <paramref name="formatted"/> is true, the JSON is pretty-printed via <see cref="Soenneker.Utils.Json.JsonUtil.Format"/>.
+    /// Parent directory is created if it does not exist. When <paramref name="formatted"/> is true, the JSON is pretty-printed using generated JSON metadata.
     /// </summary>
     /// <param name="url">The URL of the JSON resource to download</param>
     /// <param name="filePath">Full path on disk where the file will be written</param>
